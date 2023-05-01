@@ -8,10 +8,21 @@ async function findByUserId(userId: number){
     })
 }
 
+async function findByRoomId(roomId: number){
+    return await prisma.booking.findMany({
+        where: { roomId }
+    })
+}
 
-const bookingRepository = {
-    findByUserId
+async function createBooking(userId: number, roomId: number){
+    return await prisma.booking.create({
+        data: { roomId, userId }
+    })
+}
+
+export default {
+    findByUserId,
+    findByRoomId,
+    createBooking
 };
-
-export default bookingRepository;
 
