@@ -9,6 +9,7 @@ export async function getBooking(req: AuthenticatedRequest, res: Response, next:
         const booking = await bookingService.findBooking(userId);
         return res.status(httpStatus.OK).send(booking);
     } catch (error) {
+        console.log(error);
         next(error);
     }
 } 
