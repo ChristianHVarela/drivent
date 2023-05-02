@@ -3,7 +3,7 @@ import { cleanDb, generateValidToken } from "../helpers";
 import supertest from "supertest";
 import faker from "@faker-js/faker";
 import httpStatus from "http-status";
-import { createEnrollmentWithAddress, createHotel, createPayment, createRoomWithHotelId, createRoomWithHotelIdAndOneCapacity, createTicket, createTicketType, createTicketTypeRemote, createTicketTypeWithHotel, createTicketTypeWithoutHotel, createUser } from "../factories";
+import { createEnrollmentWithAddress, createHotel, createPayment, createRoomWithHotelId, createRoomWithHotelIdAndOneCapacity, createRoomWithHotelIdAndWithoutCapacity, createTicket, createTicketType, createTicketTypeRemote, createTicketTypeWithHotel, createTicketTypeWithoutHotel, createUser } from "../factories";
 import * as jwt from 'jsonwebtoken';
 import { TicketStatus } from "@prisma/client";
 import { createBooking } from "../factories/booking-factory";
@@ -195,4 +195,26 @@ describe('PUT /booking', () => {
         expect(response.status).toBe(httpStatus.UNAUTHORIZED);
     });
 
+    describe('when token is valid', () => {
+
+        it ('should respond with status 403 if the user has no booking', async () => {
+            const user = await createUser();
+            const token = await generateValidToken(user);
+            const response = await api.put('/booking/1').set('Authorization', `Bearer ${token}`).send({ roomId: 1 });
+            expect(response.status).toBe(httpStatus.FORBIDDEN);
+        })
+
+        it ('should respond with status 403 if the room has no capacity', async () => {
+            const user = await createUser();
+            const token = await generateValidToken(user);
+            const enrollment = await createEnrollmentWithAddress(user);
+            const ticketType = await createTicketTypeWithHotel();
+            const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+            const hotel = await createHotel();
+            const room = await createRoomWithHotelIdAndWithoutCapacity(hotel.id);
+            const response = await api.put('/booking/1').set('Authorization', `Bearer ${token}`).send({ roomId: 200 });
+            expect(response.status).toBe(httpStatus.FORBIDDEN);
+        })
+
+    });
 });

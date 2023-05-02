@@ -21,7 +21,7 @@ async function makeBooking(makeObj: MakeBooking, userId: number): Promise<Number
     const room = await roomRepository.findById(makeObj.roomId);
     if (!room) throw notFoundError();
     const bookingWithRoom = await bookingRepository.findByRoomId(makeObj.roomId);
-    if (bookingWithRoom && bookingWithRoom.length >= room.capacity) throw roomWithoutCapacity();
+    if ((bookingWithRoom && bookingWithRoom.length >= room.capacity) || room.capacity === 0) throw roomWithoutCapacity();
     const booking = await bookingRepository.createBooking(userId, makeObj.roomId);
     return booking.id;
 }
@@ -41,7 +41,7 @@ async function tradeBooking(userId: number, bookingId: number, makeObj: MakeBook
     const room = await roomRepository.findById(makeObj.roomId);
     if (!room) throw notFoundError();
     const bookingWithRoom = await bookingRepository.findByRoomId(makeObj.roomId);
-    if (bookingWithRoom && bookingWithRoom.length >= room.capacity) throw roomWithoutCapacity();
+    if ((bookingWithRoom && bookingWithRoom.length >= room.capacity) || room.capacity === 0) throw roomWithoutCapacity();
     await bookingRepository.deleteById(bookingId);
     const booking = await bookingRepository.createBooking(userId, makeObj.roomId);
     return booking.id;
