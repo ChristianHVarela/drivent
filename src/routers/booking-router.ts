@@ -1,4 +1,4 @@
-import { getBooking, makeBooking } from "@/controllers/booking-controller";
+import { getBooking, makeBooking, tradeBooking } from "@/controllers/booking-controller";
 import { authenticateToken, validateBody } from "@/middlewares";
 import { makeBookingSchema } from "@/schemas/booking-schemas";
 import { Router } from "express";
@@ -9,6 +9,6 @@ bookingRouter
     .all('/*', authenticateToken)
     .get('/', getBooking)
     .post('/', validateBody(makeBookingSchema), makeBooking)
-    .put('/:bookingId', validateBody(makeBookingSchema));
+    .put('/:bookingId', validateBody(makeBookingSchema), tradeBooking);
 
 export { bookingRouter }
