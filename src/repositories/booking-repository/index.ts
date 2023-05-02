@@ -20,9 +20,20 @@ async function createBooking(userId: number, roomId: number){
     })
 }
 
+async function findById(id: number){
+    return await prisma.booking.findFirst({
+        where: { id }
+    });
+}
+
+async function deleteById(id: number){
+    return await prisma.booking.delete({
+        where: { id }
+    });
+}
+
 export default {
-    findByUserId,
-    findByRoomId,
-    createBooking
+    findByUserId, findByRoomId,
+    createBooking, findById, deleteById
 };
 

@@ -5,7 +5,7 @@ import bookingRepository from "@/repositories/booking-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import roomRepository from "@/repositories/room-repository";
 import ticketsRepository from "@/repositories/tickets-repository";
-import { Room } from "@prisma/client";
+import { Booking, Room } from "@prisma/client";
 
 async function findBooking(userId: number): Promise<FindBooking> {
     const booking = await bookingRepository.findByUserId(userId);
@@ -35,6 +35,17 @@ async function checkBusinessRules(userId: number) {
     }
 }
 
+async function tradeBooking(userId: number, bookingId: number, makeObj: MakeBooking): Promise<Number> {
+    await checkBusinessRules(userId);
+    const room = await roomRepository.findById(makeObj.roomId);
+    if (!room) throw notFoundError();
+    const bookingWithRoom = await bookingRepository.findByRoomId(makeObj.roomId);
+    if (bookingWithRoom && bookingWithRoom.length >= room.capacity) throw roomWithoutCapacity();
+    await bookingRepository.deleteById(bookingId);
+    const booking = await bookingRepository.createBooking(userId, makeObj.roomId);
+    return booking.id;
+}
+
 type FindBooking = {
     id: number;
     Room: Room;
@@ -46,7 +57,8 @@ export type MakeBooking = {
 
 const bookingService = {
     findBooking,
-    makeBooking
+    makeBooking,
+    tradeBooking
 };
 
 export default bookingService;
